@@ -1,0 +1,5 @@
+<script>
+    fetch("http://localhost:3000/api/workshops")
+        .then(resp => resp.json())
+        .then(dataObj => document.body.innerHTML = `<main>${dataObj.data.map(workshop => `<h1>${workshop.title}</h1>`)}</main>`)
+</script>
