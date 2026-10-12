@@ -1,5 +1,10 @@
 import { createServer } from "node:http";
+import dotenv from "dotenv";
 
+// läser miljövariabler och lägger dem i process.env
+dotenv.config();
+
+console.log(process.env);
 
 import dayjs from "dayjs";
 import workshops, { getWorkshopById } from "./workshops.js";
@@ -13,6 +18,8 @@ console.log("get id 99", getWorkshopById(99));
 function sendJson(response, statusCode, data) {
     response.writeHead(statusCode, {'Content-Type': 'application/json; charset=utf-8'});
     response.end( JSON.stringify(data) );
+
+    return;
 }
 
 // hjälpmedel för att läsa in request body -> JS objekt
@@ -25,15 +32,18 @@ async function readJsonBody(request) {
 }
 
 
-async function requestHandler(request, response) {
+export async function requestHandler(request, response) {
     // dela upp urlen i två delar
     // url och query
     const [url, query] = request.url.split('?');
     const searchParams = new URLSearchParams(query);
     console.log(`url: ${url}, query: ${query}`, searchParams);
 
+    const match = url.match(/^\/api\/workshops\/(.+)$/);
+
     if (url === '/api/health') {
-        sendJson(response, 200, { message: "ok" })
+        sendJson(response, 200, { status: "ok" });
+        return;
     } 
     
     // Hämta alla workshops med eller utan filtrering av kategori
@@ -54,8 +64,35 @@ async function requestHandler(request, response) {
         }
 
         sendJson(response, 200, { data: workshops})
-    } 
-    
+    }
+
+    // Uppdatera en workshop
+    else if (request.method === 'GET' && match) {
+        const id = Number(match[1]);
+
+        console.log("GET workshop with id", id);
+
+    }
+
+    // Uppdatera en workshop
+    else if (request.method === 'PUT' && match) {
+        const id = Number(match[1]);
+
+        console.log("UPDATE workshop with id", id);
+
+    }
+
+    // Ta bort en workshop
+    else if (request.method === 'DELETE' && match) {
+        const id = Number(match[1]);
+
+        // hitta workshop med rätt id
+
+        // ta bort workshop om den finns
+
+        // meddela att workshop är borttagen
+    }
+
     // Lägga till ny workshop
     else if (request.method === "POST"  && url === '/api/workshops') {
 
@@ -88,4 +125,5 @@ async function requestHandler(request, response) {
 
 const server = createServer( requestHandler );
 
-server.listen(5000, () => console.log('APIet körs på http://localhost:5000'))
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => console.log(`APIet körs på http://localhost:${PORT}`))
