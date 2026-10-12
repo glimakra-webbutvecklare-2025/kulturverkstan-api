@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { requestHandler } from "./server.js";
+import { requestHandler } from "./app.js";
 
 function fakeRes() {
   return {
