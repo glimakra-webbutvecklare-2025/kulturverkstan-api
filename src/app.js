@@ -1,6 +1,7 @@
 import workshops, { getWorkshopById } from "./workshops.js";
-
-
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+ 
 // hjälpfunktion för att undvika repetition när vi skickar json
 function sendJson(response, statusCode, data) {
     response.writeHead(statusCode, {'Content-Type': 'application/json; charset=utf-8'});
@@ -31,7 +32,32 @@ export async function requestHandler(request, response) {
         if (url === '/api/health') {
             sendJson(response, 200, { status: "ok" });
             return;
-        } 
+        }
+        else if (request.method === 'GET' && url === '/') {
+            // redirect till /docs
+            response.writeHead(302, { Location: '/docs' });
+            response.end();
+        }
+        else if (request.method === 'GET' && url === '/docs') {
+            const targetFile = join(import.meta.dirname, '..', 'docs.html');
+            const docsHtml = await readFile(targetFile, 'utf-8');
+            response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8'});
+            response.end(docsHtml);
+        }
+
+        else if (request.method === 'GET' && url === '/openapi.json') {
+            // Läsa openapi.json filen och skicka ut
+
+            // import.meta.dirname, '..' , 'openai.json'
+            const targetFile = join(import.meta.dirname, '..', 'openapi.json');
+
+            const fileContent = await readFile(targetFile, 'utf-8');
+            
+            // läs in JSON till ett obj
+            const spec = JSON.parse(fileContent);
+
+            sendJson(response, 200, spec);
+        }
         
         // Hämta alla workshops med eller utan filtrering av kategori
         else if (request.method === 'GET' && url === '/api/workshops') {
