@@ -9,11 +9,15 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
+    "express-start": "node src/express-server.js",
+    "express-dev": "node --watch src/express-server.js",
     "arg": "node src/arg.js",
     "test": "node --test src/"
   },
   "dependencies": {
     "dayjs": "^1.11.23",
-    "dotenv": "^18.0.6"
+    "dotenv": "^18.0.6",
+    "express": "^5.3.0",
+    "swagger-ui-express": "^5.0.1"
   }
 }

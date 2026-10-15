@@ -29,7 +29,7 @@ export async function requestHandler(request, response) {
 
         const match = url.match(/^\/api\/workshops\/(.+)$/);
 
-        if (url === '/api/health') {
+        if (request.method === 'GET' && url === '/api/health') {
             sendJson(response, 200, { status: "ok" });
             return;
         }
