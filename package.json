@@ -7,10 +7,8 @@
   "type": "module",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "node --watch src/server.js",
-    "express-start": "node src/express-server.js",
-    "express-dev": "node --watch src/express-server.js",
+    "start": "node src/express-server.js",
+    "dev": "node --watch src/express-server.js",
     "arg": "node src/arg.js",
     "test": "node --test src/"
   },
