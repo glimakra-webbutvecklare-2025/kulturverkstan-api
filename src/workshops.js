@@ -9,6 +9,13 @@ const workshops = [
 
 export const location = "Glimåkra";
 
+export function allocateNextId() {
+   const ids = workshops.map(wk => wk.id);
+   const biggestId = Math.max(0, ...ids); // 0 finns med ifall ids är tom
+
+   return biggestId + 1;
+}
+
 export function getWorkshopById(id) {
     const foundWorkshop = workshops.find( workshop => workshop.id === id);
 
