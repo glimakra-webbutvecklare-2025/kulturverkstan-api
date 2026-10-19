@@ -9,69 +9,168 @@
         "/api/workshops": {
             "get": {
                 "summary": "Hämta workshops",
-                "parameters": [{ "name": "category", "in": "query",
-                "required": false, "schema": { "type": "string" } }],
-                "responses": { "200": {
-                "description": "Lista, eventuellt filtrerad",
-                "content": { "application/json": { "schema": {
-                    "type": "object", "required": ["data"], "properties": {
-                    "data": { "type": "array", "items": {
-                        "$ref": "#/components/schemas/Workshop"
-                    } }
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
                     }
-                } } }
-                } }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista, eventuellt filtrerad",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Workshop"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             },
             "post": {
                 "summary": "Skapa workshop",
                 "requestBody": {
                     "required": true,
-                    "content": { "application/json": { "schema": {
-                    "$ref": "#/components/schemas/WorkshopInput"
-                    } } }
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WorkshopInput"
+                            }
+                        }
+                    }
                 },
                 "responses": {
-                    "201": { "description": "Skapad workshop, i data-fältet" },
-                    "400": { "description": "Ogiltig JSON eller saknade/ogiltiga fält" }
+                    "201": {
+                        "description": "Skapad workshop, i data-fältet"
+                    },
+                    "400": {
+                        "description": "Ogiltig JSON eller saknade/ogiltiga fält"
+                    }
                 }
             }
         },
         "/api/workshops/{id}": {
-            "parameters": [{ "name": "id", "in": "path", "required": true,
-                "schema": { "type": "integer", "minimum": 1 } }],
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                        "type": "integer",
+                        "minimum": 1
+                    }
+                }
+            ],
             "put": {
                 "summary": "Ersätt workshopens redigerbara fält",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WorkshopInput"
+                            }
+                        }
+                    }
+                },
                 "responses": {
-                "200": { "description": "Uppdaterad workshop i data-fältet" },
-                "400": { "description": "Ogiltigt id, JSON eller fält" },
-                "404": { "description": "Workshopen saknas" }
+                    "200": {
+                        "description": "Uppdaterad workshop",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Workshop"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Ogiltigt id, JSON eller fält"
+                    },
+                    "404": {
+                        "description": "Workshopen saknas"
+                    }
                 }
             },
             "delete": {
                 "summary": "Ta bort workshop",
                 "responses": {
-                "204": { "description": "Borttagen, ingen body" },
-                "400": { "description": "Ogiltigt id" },
-                "404": { "description": "Workshopen saknas" }
+                    "204": {
+                        "description": "Borttagen, ingen body"
+                    },
+                    "400": {
+                        "description": "Ogiltigt id"
+                    },
+                    "404": {
+                        "description": "Workshopen saknas"
+                    }
                 }
             }
         }
     },
-    "components": { "schemas": {
-        "WorkshopInput": {
-            "type": "object", "required": ["title", "category"],
-            "properties": {
-                "title": { "type": "string", "minLength": 1 },
-                "category": { "type": "string", "minLength": 1 }
+    "components": {
+        "schemas": {
+            "WorkshopInput": {
+                "type": "object",
+                "required": [
+                    "title",
+                    "category"
+                ],
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "category": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                }
+            },
+            "Workshop": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/WorkshopInput"
+                    },
+                    {
+                        "type": "object",
+                        "required": [
+                            "id"
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "readOnly": true
+                            }
+                        }
+                    }
+                ]
             }
-        },
-        "Workshop": {
-            "allOf": [
-                { "$ref": "#/components/schemas/WorkshopInput" },
-                { "type": "object", "required": ["id"], "properties": {
-                    "id": { "type": "integer", "minimum": 1, "readOnly": true }
-                }}
-            ]
         }
-    } }
+    }
 }
