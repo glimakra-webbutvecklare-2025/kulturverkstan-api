@@ -1,75 +1,92 @@
 import express from "express";
-import { logger } from "./express-logger.js";
+import logger from "./express-logger.js";
 import workshops from "./workshops.js";
-
-
 const app = express();
 
-// använda en middleware i express:
+// middlare, möjligör att loggning efter response
 app.use(logger);
-// läsa JSON body från en request
-app.use(express.json())
 
-app.get('/api/health', (request, response) => {
-    response.status(200).json({ status: 'express - ok' });
+// middlare, möjligör att JSON kan tolkas och samlas i req.body
+app.use(express.json());
+
+// Registera route -> handler
+app.get('/api/health', (req, res) => {
+    res.status(200).json({ message: "ok" });
 })
 
-app.get('/api/workshops', (request, response) => {
-    const { category } = request.query;
+// hämta alla workshops
+app.get('/api/workshops', (req, res) => {
 
-    console.log(typeof category)
-    if (category && Number(category)) {
-        return response.status(400).json({ message: 'invalid category query' });
-    }
-    if (category) {
-        const filteredWorkshops = workshops.filter(wk => wk.category === category.toLowerCase());
-        return response.status(200).json({ data: filteredWorkshops});
-    }
-    response.status(200).json({ data: workshops });
-});
-
-app.post('/api/workshops',  (request, response) => {
-    // plocka ut title, category
-    const { title, category } = request.body;
-
-    // undersöka att det är rimlig input
-    //  om orimlig input, meddela 400
-    if (!title || title.length < 3 || !category || category.length < 2) {
-        return response.status(400).json({ message: "Bad format of title and category" })
+    // filter hantering
+    if (req.query.category) {
+        const filteredWorkshops = workshops.filter(wk => wk.category === req.query.category.toLowerCase())
+        return res.status(200).json({ data: filteredWorkshops });
     }
 
+    res.status(200).json({ data: workshops });
+})
+
+// hämta EN workshops givet id
+app.get('/api/workshops/:id', (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isSafeInteger(id) || id < 1) {
+        return res.status(400).json({ message: 'invalid id' });
+    }
+
+    // försök hitta index till workshop
+    const workshopIndex = workshops.findIndex(wk => wk.id === id);
+
+    // om ej hittat -> 404
+    if (workshopIndex < 0) {
+        return res.status(404).end();
+    }
+    // svara med hittad workshop
+    res.status(200).json({data: workshops[workshopIndex]});
+})
+
+// skapa en workshop
+app.post('/api/workshops', (req, res) => {
+    // hämta data från req.body
+    const { title, category } = req.body;
+
+    // validera datan
+    if (typeof title !== 'string' || !title.trim() ||
+        typeof category !== 'string' || !category.trim()) {
+        return res.status(400).json({ message: 'title and category required'});
+    }
     // skapa ny workshop
-    const newWorkshop = { id: workshops.length + 1, title, category }
+    const newWorkshop = {
+        id: workshops.length + 1, // Tillfälligt! Rättas i lektion 2.
+        title: title.trim(),
+        category: category.trim().toLowerCase()
+    };
+    
     workshops.push(newWorkshop);
 
-    // meddela success
-    response.status(200).json({data: newWorkshop})
+    return res.status(201).json({ data: newWorkshop });
 })
 
-// todo
-app.put('/api/workshops/:id', (request, response) => {});
-
-app.delete('/api/workshops/:id', (request, response) => {
-    const id = Number(request.params.id);
-
-    // Validera om id har rätt format
+// delete en workshop givet id
+app.delete('/api/workshops/:id', (req, res) => {
+    // försök hitta workshop index
+    const id = Number(req.params.id);
     if (!Number.isSafeInteger(id) || id < 1) {
-        return response.status(400).json({ message: 'invalid id' });
+        return res.status(400).json({ message: 'invalid id' });
     }
 
-    // hitta workshop med rätt id
-    const workshopIndex = workshops.findIndex(workshop => workshop.id === id);
+    // försök hitta index till workshop
+    const workshopIndex = workshops.findIndex(wk => wk.id === id);
 
-    if (workshopIndex === -1) {
-        return response.status(404);
+    // om ej hittad -> 404
+    if (workshopIndex < 0) {
+        return res.status(404).end();
     }
 
-    // ta bort workshop från array `workshops` om den finns
+    // ta bort workshop
     workshops.splice(workshopIndex, 1);
 
-    // meddela att workshop är borttagen
-    return response.status(204).end();
-});
-
+    // svara 204
+    res.status(204).end();
+})
 
 export default app;

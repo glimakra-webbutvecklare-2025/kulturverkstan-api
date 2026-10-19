@@ -1,5 +1,6 @@
-import 'dotenv/config';
-import app from './express-app.js';
-const port = Number(process.env.PORT) || 3000;
+import app from "./express-app.js";
+import 'dotenv/config'; // läs .env fil och lägg in i process.env
 
-app.listen(port, () => console.log(`API: http://localhost:${port}`));
+const PORT = Number(process.env.PORT) || 3000;
+
+app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
